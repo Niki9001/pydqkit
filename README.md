@@ -1,6 +1,6 @@
 # pydqkit
 
-**pydqkit** is a lightweight, developer-first Python toolkit for **data quality profiling and interactive HTML visualization**.
+**pydqkit** is a lightweight, developer-first Python toolkit for **data quality profiling, data validation, sanity check and interactive HTML visualization**.
 
 It helps data engineers and analysts quickly understand the structure, completeness, and patterns of tabular datasets, without requiring any external platforms or services.
 
