@@ -11,8 +11,22 @@ requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [
   { name = "Niki Zheng", email = "nikizheng90@gmail.com" },
+  { name = "Luqun Li", email = "success@shnu.edu.cn" },
 ]
-keywords = ["data-quality", "profiling", "data-validation", "pandas", "report"]
+keywords = [
+  "data quality",
+  "data-quality",
+  "data profiling",
+  "data-profiling",
+  "data validation",
+  "data-validation",
+  "pandas",
+  "data engineering",
+  "data-engineering",
+  "etl",
+  "sanity check",
+  "sanity-check"
+]
 
 classifiers = [
   "Development Status :: 4 - Beta",
