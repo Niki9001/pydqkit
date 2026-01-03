@@ -141,4 +141,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## Author
 
-**Niki Zheng** **Luqun Li**
+**Niki Zheng,** **Luqun Li**
