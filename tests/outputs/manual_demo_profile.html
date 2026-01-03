@@ -1,0 +1,671 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PyDQ - manual_demo</title>
+<style>
+  :root {
+    --c-distinct: #1aa6a6;
+    --c-nondistinct: #0b1b26;
+    --c-null: #111111;
+
+    --bg: #f3f4f6;
+    --panel: #ffffff;
+    --grid: #d9dee5;
+    --text: #111827;
+    --muted: #6b7280;
+    --header: #f9fafb;
+    --select: #dbeafe; /* selection highlight */
+  }
+
+  body {
+    font-family: Segoe UI, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+  }
+
+  .topbar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--grid);
+    padding: 10px 14px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    align-items: center;
+  }
+
+  .tab {
+    color: var(--muted);
+    padding: 6px 8px;
+    border-radius: 6px;
+    user-select: none;
+  }
+
+  .tab.active {
+    color: var(--text);
+    font-weight: 600;
+    background: var(--header);
+    border: 1px solid var(--grid);
+  }
+
+  .container {
+    padding: 12px 14px 18px 14px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 10px 0;
+  }
+
+  .title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 10px;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .find {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .find input {
+    padding: 6px 10px;
+    border: 1px solid var(--grid);
+    border-radius: 6px;
+    width: 280px;
+    background: white;
+    font-size: 12px;
+  }
+
+  /* ---- Data preview styles ---- */
+  .preview-block {
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    border-radius: 8px;
+    padding: 10px 10px 8px 10px;
+    margin-bottom: 10px;
+  }
+
+  .preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .preview-wrap {
+    overflow: auto;
+    max-height: 220px;
+    border: 1px solid var(--grid);
+    border-radius: 6px;
+  }
+
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+  }
+
+  .preview-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--header);
+    border-bottom: 1px solid var(--grid);
+    font-size: 12px;
+    padding: 6px 8px;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .preview-table tbody td {
+    border-top: 1px solid var(--grid);
+    font-size: 12px;
+    padding: 6px 8px;
+    white-space: nowrap;
+  }
+
+  /* ---- Main table ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--grid);
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--header);
+    border-bottom: 1px solid var(--grid);
+    font-size: 12px;
+    text-align: left;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    border-top: 1px solid var(--grid);
+    padding: 8px 10px;
+    font-size: 12px;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: #eef2f7;
+  }
+
+  tr.data-row {
+    cursor: pointer;
+  }
+
+  tr.data-row.selected {
+    background: var(--select) !important;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col-name {
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .dist-cell {
+    min-width: 190px;
+  }
+
+  .bar {
+    width: 170px;
+    height: 12px;
+    border: 1px solid var(--grid);
+    border-radius: 3px;
+    background: #ffffff;
+    overflow: hidden;
+  }
+
+  .bar-inner {
+    width: 100%;
+    height: 100%;
+  }
+
+  .pill span {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eeeeee;
+    font-size: 11px;
+    color: #111827;
+    border: 1px solid #dddddd;
+  }
+
+  /* ---- JSON panel ---- */
+  .json-block {
+    margin-top: 10px;
+    background: var(--panel);
+    border: 1px solid var(--grid);
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .json-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .json-title {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .json-spacer {
+    flex: 1;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--grid);
+    background: white;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    background: #f3f4f6;
+  }
+
+  pre.json-pre {
+    margin: 0;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--grid);
+    background: #0b1220;
+    color: #e5e7eb;
+    overflow: auto;
+    max-height: 320px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .footer-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tabs">
+    <div class="tab active">Data Profiling Results</div>
+
+  </div>
+</div>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="title">Columns and Rules</div>
+    <div class="meta">
+      Dataset: <b>manual_demo</b> ·
+      Rows: <b>4</b> ·
+      Columns: <b>6</b> ·
+      Overall Missing: <b>12.50%</b>
+    </div>
+    <div class="spacer"></div>
+    <div class="find">
+      <input id="findBox" type="text" placeholder="Find" />
+    </div>
+  </div>
+
+  
+    <div class="preview-block">
+      <div class="preview-title">Data Preview (Top 4 rows)</div>
+      <div class="preview-wrap">
+        <table class="preview-table">
+          <thead><tr><th>id</th><th>age</th><th>score</th><th>date</th><th>city</th><th>flag</th></tr></thead>
+          <tbody><tr><td>AB123456</td><td>29.0</td><td>88.5</td><td>2025-12-01</td><td>Halifax</td><td>True</td></tr><tr><td>CD000001</td><td>35.0</td><td>91.2</td><td>2025-12-02</td><td>Dartmouth</td><td>False</td></tr><tr><td>EF999999</td><td>nan</td><td>76.0</td><td>2025-12-02</td><td>Halifax</td><td>True</td></tr><tr><td></td><td>42.0</td><td>91.2</td><td></td><td>Bedford</td><td>True</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    
+
+  <table id="profileTable">
+    <thead>
+      <tr>
+        <th>Columns</th>
+        <th>Value Distribution</th>
+        <th class="num">% Null</th>
+        <th class="num"># Null</th>
+        <th class="num">% Distinct</th>
+        <th class="num"># Distinct</th>
+        <th class="num">% Non-distinct</th>
+        <th class="num"># Non-distinct</th>
+        <th class="num"># Patterns</th>
+        <th class="num">% of Top Pattern</th>
+        <th class="num">Minimum Len</th>
+        <th class="num">Maximum Len</th>
+        <th>profile_type</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+            <tr class="data-row" data-col="id" data-json="{&quot;name&quot;:&quot;id&quot;,&quot;profile_type&quot;:&quot;string&quot;,&quot;pandas_dtype&quot;:&quot;object&quot;,&quot;row_count&quot;:4,&quot;missing_count&quot;:1,&quot;missing_rate&quot;:0.25,&quot;non_null_count&quot;:3,&quot;non_null_rate&quot;:0.75,&quot;distinct_count&quot;:3,&quot;duplicate_count&quot;:0,&quot;min&quot;:null,&quot;max&quot;:null,&quot;mean&quot;:null,&quot;median&quot;:null,&quot;std&quot;:null,&quot;min_len&quot;:0,&quot;max_len&quot;:8,&quot;avg_len&quot;:8.0,&quot;pattern_summary&quot;:[{&quot;pattern&quot;:&quot;L2D6&quot;,&quot;count&quot;:3,&quot;pct&quot;:1.0}],&quot;top_values&quot;:[{&quot;value&quot;:&quot;AB123456&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;CD000001&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;EF999999&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;&lt;NA&gt;&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;type_suggestion&quot;:{&quot;suggested_type&quot;:&quot;STRING&quot;,&quot;max_len&quot;:8,&quot;confidence&quot;:1.0}}">
+              <td class="col-name">id</td>
+              <td class="dist-cell">
+    <div class="bar" title="Distinct: 75.00% (3/4) | Non-distinct: 0.00% (0/4) | Null: 25.00% (1/4)">
+      <div class="bar-inner" style="
+        background: linear-gradient(
+          to right,
+          var(--c-distinct) 0%,
+          var(--c-distinct) 75.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-null) 75.00%,
+          var(--c-null) 100%
+        );
+      "></div>
+    </div>
+    </td>
+              <td class="num">25.00%</td>
+              <td class="num">1</td>
+              <td class="num">100.00%</td>
+              <td class="num">3</td>
+              <td class="num">0.00%</td>
+              <td class="num">0</td>
+              <td class="num">1</td>
+              <td class="num">100.00%</td>
+              <td class="num">0</td>
+              <td class="num">8</td>
+              <td class="pill">string</td>
+            </tr>
+            
+            <tr class="data-row" data-col="age" data-json="{&quot;name&quot;:&quot;age&quot;,&quot;profile_type&quot;:&quot;numeric&quot;,&quot;pandas_dtype&quot;:&quot;float64&quot;,&quot;row_count&quot;:4,&quot;missing_count&quot;:1,&quot;missing_rate&quot;:0.25,&quot;non_null_count&quot;:3,&quot;non_null_rate&quot;:0.75,&quot;distinct_count&quot;:3,&quot;duplicate_count&quot;:0,&quot;min&quot;:29.0,&quot;max&quot;:42.0,&quot;mean&quot;:35.333333333333336,&quot;median&quot;:35.0,&quot;std&quot;:6.506407098647712,&quot;min_len&quot;:0,&quot;max_len&quot;:4,&quot;avg_len&quot;:4.0,&quot;pattern_summary&quot;:[{&quot;pattern&quot;:&quot;D2.D&quot;,&quot;count&quot;:3,&quot;pct&quot;:1.0}],&quot;top_values&quot;:[{&quot;value&quot;:&quot;29.0&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;35.0&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;&lt;NA&gt;&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;42.0&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;type_suggestion&quot;:{&quot;suggested_type&quot;:&quot;DATETIME&quot;,&quot;confidence&quot;:1.0}}">
+              <td class="col-name">age</td>
+              <td class="dist-cell">
+    <div class="bar" title="Distinct: 75.00% (3/4) | Non-distinct: 0.00% (0/4) | Null: 25.00% (1/4)">
+      <div class="bar-inner" style="
+        background: linear-gradient(
+          to right,
+          var(--c-distinct) 0%,
+          var(--c-distinct) 75.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-null) 75.00%,
+          var(--c-null) 100%
+        );
+      "></div>
+    </div>
+    </td>
+              <td class="num">25.00%</td>
+              <td class="num">1</td>
+              <td class="num">100.00%</td>
+              <td class="num">3</td>
+              <td class="num">0.00%</td>
+              <td class="num">0</td>
+              <td class="num">1</td>
+              <td class="num">100.00%</td>
+              <td class="num">0</td>
+              <td class="num">4</td>
+              <td class="pill">numeric</td>
+            </tr>
+            
+            <tr class="data-row" data-col="score" data-json="{&quot;name&quot;:&quot;score&quot;,&quot;profile_type&quot;:&quot;numeric&quot;,&quot;pandas_dtype&quot;:&quot;float64&quot;,&quot;row_count&quot;:4,&quot;missing_count&quot;:0,&quot;missing_rate&quot;:0.0,&quot;non_null_count&quot;:4,&quot;non_null_rate&quot;:1.0,&quot;distinct_count&quot;:3,&quot;duplicate_count&quot;:1,&quot;min&quot;:76.0,&quot;max&quot;:91.2,&quot;mean&quot;:86.725,&quot;median&quot;:89.85,&quot;std&quot;:7.262403183519902,&quot;min_len&quot;:4,&quot;max_len&quot;:4,&quot;avg_len&quot;:4.0,&quot;pattern_summary&quot;:[{&quot;pattern&quot;:&quot;D2.D&quot;,&quot;count&quot;:4,&quot;pct&quot;:1.0}],&quot;top_values&quot;:[{&quot;value&quot;:&quot;91.2&quot;,&quot;count&quot;:2,&quot;pct&quot;:0.5},{&quot;value&quot;:&quot;88.5&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;76.0&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;type_suggestion&quot;:{&quot;suggested_type&quot;:&quot;DATETIME&quot;,&quot;confidence&quot;:1.0}}">
+              <td class="col-name">score</td>
+              <td class="dist-cell">
+    <div class="bar" title="Distinct: 75.00% (3/4) | Non-distinct: 25.00% (1/4) | Null: 0.00% (0/4)">
+      <div class="bar-inner" style="
+        background: linear-gradient(
+          to right,
+          var(--c-distinct) 0%,
+          var(--c-distinct) 75.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-nondistinct) 100.00%,
+          var(--c-null) 100.00%,
+          var(--c-null) 100%
+        );
+      "></div>
+    </div>
+    </td>
+              <td class="num">0.00%</td>
+              <td class="num">0</td>
+              <td class="num">75.00%</td>
+              <td class="num">3</td>
+              <td class="num">25.00%</td>
+              <td class="num">1</td>
+              <td class="num">1</td>
+              <td class="num">100.00%</td>
+              <td class="num">4</td>
+              <td class="num">4</td>
+              <td class="pill">numeric</td>
+            </tr>
+            
+            <tr class="data-row" data-col="date" data-json="{&quot;name&quot;:&quot;date&quot;,&quot;profile_type&quot;:&quot;datetime&quot;,&quot;pandas_dtype&quot;:&quot;object&quot;,&quot;row_count&quot;:4,&quot;missing_count&quot;:1,&quot;missing_rate&quot;:0.25,&quot;non_null_count&quot;:3,&quot;non_null_rate&quot;:0.75,&quot;distinct_count&quot;:2,&quot;duplicate_count&quot;:1,&quot;min&quot;:&quot;2025-12-01T00:00:00&quot;,&quot;max&quot;:&quot;2025-12-02T00:00:00&quot;,&quot;mean&quot;:null,&quot;median&quot;:null,&quot;std&quot;:null,&quot;min_len&quot;:0,&quot;max_len&quot;:10,&quot;avg_len&quot;:10.0,&quot;pattern_summary&quot;:[{&quot;pattern&quot;:&quot;D4-D2-D2&quot;,&quot;count&quot;:3,&quot;pct&quot;:1.0}],&quot;top_values&quot;:[{&quot;value&quot;:&quot;2025-12-02&quot;,&quot;count&quot;:2,&quot;pct&quot;:0.5},{&quot;value&quot;:&quot;2025-12-01&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;&lt;NA&gt;&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;type_suggestion&quot;:{&quot;suggested_type&quot;:&quot;DATETIME&quot;,&quot;confidence&quot;:1.0}}">
+              <td class="col-name">date</td>
+              <td class="dist-cell">
+    <div class="bar" title="Distinct: 50.00% (2/4) | Non-distinct: 25.00% (1/4) | Null: 25.00% (1/4)">
+      <div class="bar-inner" style="
+        background: linear-gradient(
+          to right,
+          var(--c-distinct) 0%,
+          var(--c-distinct) 50.00%,
+          var(--c-nondistinct) 50.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-null) 75.00%,
+          var(--c-null) 100%
+        );
+      "></div>
+    </div>
+    </td>
+              <td class="num">25.00%</td>
+              <td class="num">1</td>
+              <td class="num">66.67%</td>
+              <td class="num">2</td>
+              <td class="num">33.33%</td>
+              <td class="num">1</td>
+              <td class="num">1</td>
+              <td class="num">100.00%</td>
+              <td class="num">0</td>
+              <td class="num">10</td>
+              <td class="pill">datetime</td>
+            </tr>
+            
+            <tr class="data-row" data-col="city" data-json="{&quot;name&quot;:&quot;city&quot;,&quot;profile_type&quot;:&quot;string&quot;,&quot;pandas_dtype&quot;:&quot;object&quot;,&quot;row_count&quot;:4,&quot;missing_count&quot;:0,&quot;missing_rate&quot;:0.0,&quot;non_null_count&quot;:4,&quot;non_null_rate&quot;:1.0,&quot;distinct_count&quot;:3,&quot;duplicate_count&quot;:1,&quot;min&quot;:null,&quot;max&quot;:null,&quot;mean&quot;:null,&quot;median&quot;:null,&quot;std&quot;:null,&quot;min_len&quot;:7,&quot;max_len&quot;:9,&quot;avg_len&quot;:7.5,&quot;pattern_summary&quot;:[{&quot;pattern&quot;:&quot;Ll6&quot;,&quot;count&quot;:3,&quot;pct&quot;:0.75},{&quot;pattern&quot;:&quot;Ll8&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;top_values&quot;:[{&quot;value&quot;:&quot;Halifax&quot;,&quot;count&quot;:2,&quot;pct&quot;:0.5},{&quot;value&quot;:&quot;Dartmouth&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25},{&quot;value&quot;:&quot;Bedford&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;type_suggestion&quot;:{&quot;suggested_type&quot;:&quot;STRING&quot;,&quot;max_len&quot;:9,&quot;confidence&quot;:1.0}}">
+              <td class="col-name">city</td>
+              <td class="dist-cell">
+    <div class="bar" title="Distinct: 75.00% (3/4) | Non-distinct: 25.00% (1/4) | Null: 0.00% (0/4)">
+      <div class="bar-inner" style="
+        background: linear-gradient(
+          to right,
+          var(--c-distinct) 0%,
+          var(--c-distinct) 75.00%,
+          var(--c-nondistinct) 75.00%,
+          var(--c-nondistinct) 100.00%,
+          var(--c-null) 100.00%,
+          var(--c-null) 100%
+        );
+      "></div>
+    </div>
+    </td>
+              <td class="num">0.00%</td>
+              <td class="num">0</td>
+              <td class="num">75.00%</td>
+              <td class="num">3</td>
+              <td class="num">25.00%</td>
+              <td class="num">1</td>
+              <td class="num">2</td>
+              <td class="num">75.00%</td>
+              <td class="num">7</td>
+              <td class="num">9</td>
+              <td class="pill">string</td>
+            </tr>
+            
+            <tr class="data-row" data-col="flag" data-json="{&quot;name&quot;:&quot;flag&quot;,&quot;profile_type&quot;:&quot;boolean&quot;,&quot;pandas_dtype&quot;:&quot;bool&quot;,&quot;row_count&quot;:4,&quot;missing_count&quot;:0,&quot;missing_rate&quot;:0.0,&quot;non_null_count&quot;:4,&quot;non_null_rate&quot;:1.0,&quot;distinct_count&quot;:2,&quot;duplicate_count&quot;:2,&quot;min&quot;:0,&quot;max&quot;:1,&quot;mean&quot;:0.75,&quot;median&quot;:1.0,&quot;std&quot;:0.5,&quot;min_len&quot;:4,&quot;max_len&quot;:5,&quot;avg_len&quot;:4.25,&quot;pattern_summary&quot;:[{&quot;pattern&quot;:&quot;Ll3&quot;,&quot;count&quot;:3,&quot;pct&quot;:0.75},{&quot;pattern&quot;:&quot;Ll4&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;top_values&quot;:[{&quot;value&quot;:&quot;True&quot;,&quot;count&quot;:3,&quot;pct&quot;:0.75},{&quot;value&quot;:&quot;False&quot;,&quot;count&quot;:1,&quot;pct&quot;:0.25}],&quot;type_suggestion&quot;:{&quot;suggested_type&quot;:&quot;BOOLEAN&quot;,&quot;confidence&quot;:1.0}}">
+              <td class="col-name">flag</td>
+              <td class="dist-cell">
+    <div class="bar" title="Distinct: 50.00% (2/4) | Non-distinct: 50.00% (2/4) | Null: 0.00% (0/4)">
+      <div class="bar-inner" style="
+        background: linear-gradient(
+          to right,
+          var(--c-distinct) 0%,
+          var(--c-distinct) 50.00%,
+          var(--c-nondistinct) 50.00%,
+          var(--c-nondistinct) 100.00%,
+          var(--c-null) 100.00%,
+          var(--c-null) 100%
+        );
+      "></div>
+    </div>
+    </td>
+              <td class="num">0.00%</td>
+              <td class="num">0</td>
+              <td class="num">50.00%</td>
+              <td class="num">2</td>
+              <td class="num">50.00%</td>
+              <td class="num">2</td>
+              <td class="num">2</td>
+              <td class="num">75.00%</td>
+              <td class="num">4</td>
+              <td class="num">5</td>
+              <td class="pill">boolean</td>
+            </tr>
+            
+    </tbody>
+  </table>
+
+  <div class="json-block" id="jsonBlock">
+    <div class="json-header">
+      <div class="json-title" id="jsonTitle">Column JSON: id</div>
+      <div class="json-spacer"></div>
+      <button class="btn" id="copyBtn" type="button">Copy JSON</button>
+    </div>
+    <pre class="json-pre" id="jsonPre">{
+  &quot;name&quot;: &quot;id&quot;,
+  &quot;profile_type&quot;: &quot;string&quot;,
+  &quot;pandas_dtype&quot;: &quot;object&quot;,
+  &quot;row_count&quot;: 4,
+  &quot;missing_count&quot;: 1,
+  &quot;missing_rate&quot;: 0.25,
+  &quot;non_null_count&quot;: 3,
+  &quot;non_null_rate&quot;: 0.75,
+  &quot;distinct_count&quot;: 3,
+  &quot;duplicate_count&quot;: 0,
+  &quot;min&quot;: null,
+  &quot;max&quot;: null,
+  &quot;mean&quot;: null,
+  &quot;median&quot;: null,
+  &quot;std&quot;: null,
+  &quot;min_len&quot;: 0,
+  &quot;max_len&quot;: 8,
+  &quot;avg_len&quot;: 8.0,
+  &quot;pattern_summary&quot;: [
+    {
+      &quot;pattern&quot;: &quot;L2D6&quot;,
+      &quot;count&quot;: 3,
+      &quot;pct&quot;: 1.0
+    }
+  ],
+  &quot;top_values&quot;: [
+    {
+      &quot;value&quot;: &quot;AB123456&quot;,
+      &quot;count&quot;: 1,
+      &quot;pct&quot;: 0.25
+    },
+    {
+      &quot;value&quot;: &quot;CD000001&quot;,
+      &quot;count&quot;: 1,
+      &quot;pct&quot;: 0.25
+    },
+    {
+      &quot;value&quot;: &quot;EF999999&quot;,
+      &quot;count&quot;: 1,
+      &quot;pct&quot;: 0.25
+    },
+    {
+      &quot;value&quot;: &quot;&lt;NA&gt;&quot;,
+      &quot;count&quot;: 1,
+      &quot;pct&quot;: 0.25
+    }
+  ],
+  &quot;type_suggestion&quot;: {
+    &quot;suggested_type&quot;: &quot;STRING&quot;,
+    &quot;max_len&quot;: 8,
+    &quot;confidence&quot;: 1.0
+  }
+}</pre>
+  </div>
+
+  <div class="footer-note">
+    Tip: Use Find to filter columns. Click a row to view the underlying JSON.
+  </div>
+</div>
+
+<script>
+  const findBox = document.getElementById('findBox');
+  const table = document.getElementById('profileTable');
+  const jsonTitle = document.getElementById('jsonTitle');
+  const jsonPre = document.getElementById('jsonPre');
+  const copyBtn = document.getElementById('copyBtn');
+
+  function pretty(obj) {
+    try {
+      return JSON.stringify(obj, null, 2);
+    } catch (e) {
+      return String(obj);
+    }
+  }
+
+  function clearSelected() {
+    const rows = table.querySelectorAll('tbody tr.data-row');
+    rows.forEach(r => r.classList.remove('selected'));
+  }
+
+  // Find filter
+  findBox.addEventListener('input', () => {
+    const q = findBox.value.trim().toLowerCase();
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(r => {
+      const name = (r.querySelector('.col-name')?.textContent || '').toLowerCase();
+      r.style.display = name.includes(q) ? '' : 'none';
+    });
+  });
+
+  // Click -> show JSON
+  table.addEventListener('click', (evt) => {
+    const tr = evt.target.closest('tr.data-row');
+    if (!tr) return;
+
+    clearSelected();
+    tr.classList.add('selected');
+
+    const colName = tr.getAttribute('data-col') || '';
+    const raw = tr.getAttribute('data-json') || '{}';
+
+    try {
+      const obj = JSON.parse(raw);
+      jsonTitle.textContent = colName ? ('Column JSON: ' + colName) : 'Column JSON';
+      jsonPre.textContent = pretty(obj);
+    } catch (e) {
+      jsonTitle.textContent = colName ? ('Column JSON: ' + colName) : 'Column JSON';
+      jsonPre.textContent = raw;
+    }
+  });
+
+
+  // Copy JSON
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(jsonPre.textContent || '');
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => copyBtn.textContent = 'Copy JSON', 900);
+    } catch (e) {
+      // fallback: select text
+      const range = document.createRange();
+      range.selectNodeContents(jsonPre);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      copyBtn.textContent = 'Select and Copy';
+      setTimeout(() => copyBtn.textContent = 'Copy JSON', 1200);
+    }
+  });
+
+  // Render profile_type pills
+  const pillCells = document.querySelectorAll('td.pill');
+  pillCells.forEach(td => {
+    const t = td.textContent.trim();
+    td.innerHTML = t ? `<span>${t}</span>` : '';
+  });
+
+  // Auto-select first visible row to match default panel
+  const firstRow = table.querySelector('tbody tr.data-row');
+  if (firstRow) {
+    firstRow.classList.add('selected');
+  }
+</script>
+
+</body>
+</html>
