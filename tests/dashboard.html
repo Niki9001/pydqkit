@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PyDQKit DQ Dashboard</title>
+<style>
+  :root {
+    --bg:#f3f4f6; --panel:#ffffff; --grid:#d9dee5; --text:#111827; --muted:#6b7280;
+    --header:#f9fafb; --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --select:#dbeafe;
+  }
+  body { margin:0; font-family: Segoe UI, Arial, sans-serif; background:var(--bg); color:var(--text); }
+  .topbar { background:var(--panel); border-bottom:1px solid var(--grid); padding:12px 14px; }
+  .title { font-size:14px; font-weight:700; }
+  .meta { font-size:12px; color:var(--muted); margin-top:4px; }
+  .container { padding:12px 14px 18px 14px; }
+  .block { background:var(--panel); border:1px solid var(--grid); border-radius:10px; padding:10px; margin-bottom:10px; }
+  .block-title { font-size:12px; font-weight:700; margin-bottom:8px; display:flex; gap:10px; align-items:center; }
+  .block-subtitle { font-size:12px; color:var(--muted); font-weight:600; }
+  .table-wrap { overflow:auto; border:1px solid var(--grid); border-radius:8px; }
+  table { width:100%; border-collapse:collapse; background:#fff; }
+  thead th { position:sticky; top:0; background:var(--header); border-bottom:1px solid var(--grid); font-size:12px; text-align:left; padding:8px 10px; white-space:nowrap; }
+  tbody td { border-top:1px solid var(--grid); font-size:12px; padding:8px 10px; vertical-align:top; }
+  tbody tr:hover { background:#eef2f7; }
+  .mono { font-family: var(--mono); }
+  .issue { color:#991b1b; }
+  .note { font-size:12px; color:var(--muted); }
+  .num { text-align:center; font-variant-numeric: tabular-nums; }
+  tr.sum-row { cursor:pointer; }
+  tr.sum-row.selected { background:var(--select) !important; }
+
+  /* ---- pass_rate badge ---- */
+  .rate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .rate-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px; /* small square */
+    display: inline-block;
+  }
+  .rate-green { background: #22c55e; }
+  .rate-yellow { background: #facc15; }
+  .rate-red { background: #ef4444; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="title">PyDQKit DQ Dashboard</div>
+    <div class="meta">Rows: <b>6</b> · Columns: <b>3</b> · Checks: <b>3</b></div>
+  </div>
+
+  <div class="container">
+    
+        <div class="block">
+          <div class="block-title">Data Preview (Top 10 rows)</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>id</th><th>status</th><th>amount</th></tr></thead>
+              <tbody><tr><td>AB123456</td><td>ACTIVE</td><td>10</td></tr><tr><td>ZZ000001</td><td>INACTIVE</td><td>20.5</td></tr><tr><td>A123</td><td>BAD</td><td>30</td></tr><tr><td></td><td>ACTIVE</td><td></td></tr><tr><td>ab123456</td><td></td><td>xx</td></tr><tr><td>AA999999</td><td>inactive</td><td>999</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        
+
+    <div class="block">
+      <div class="block-title">Summary <span class="block-subtitle">(click a rule to filter Failed Rows)</span></div>
+      
+    <div class="table-wrap">
+      <table id="summaryTable">
+        <thead><tr><th>check_no</th><th>rule_type</th><th>column</th><th>pattern_or_expr</th><th>mode</th><th>allow_null</th><th>flags</th><th class='num'>total</th><th class='num'>pass</th><th class='num'>fail</th><th class='num'>null</th><th class='num'>non_null</th><th class='num'>pass_rate</th><th>fail_samples</th></tr></thead>
+        <tbody><tr class='sum-row' data-check='1'><td class=''>1</td><td class=''>regex</td><td class=''>id</td><td class='mono'>^[A-Z]{2}\d{6}$</td><td class=''>fullmatch</td><td class=''>True</td><td class=''></td><td class='num'>6</td><td class='num'>4</td><td class='num'>2</td><td class='num'>1</td><td class='num'>5</td><td class='num'><span class='rate-badge'><span class='rate-dot rate-yellow'></span>66.67%</span></td><td class='mono'>A123|ab123456</td></tr><tr class='sum-row' data-check='2'><td class=''>2</td><td class=''>regex</td><td class=''>status</td><td class='mono'>^(ACTIVE|INACTIVE)$</td><td class=''>fullmatch</td><td class=''>False</td><td class=''></td><td class='num'>6</td><td class='num'>3</td><td class='num'>3</td><td class='num'>1</td><td class='num'>5</td><td class='num'><span class='rate-badge'><span class='rate-dot rate-yellow'></span>50.00%</span></td><td class='mono'>BAD|inactive</td></tr><tr class='sum-row' data-check='3'><td class=''>3</td><td class=''>regex</td><td class=''>amount</td><td class='mono'>^\d+(\.\d+)?$</td><td class=''>fullmatch</td><td class=''>True</td><td class=''></td><td class='num'>6</td><td class='num'>5</td><td class='num'>1</td><td class='num'>1</td><td class='num'>5</td><td class='num'><span class='rate-badge'><span class='rate-dot rate-green'></span>83.33%</span></td><td class='mono'>xx</td></tr></tbody>
+      </table>
+    </div>
+    <div class="note" style="margin-top:8px;">
+      Tip: Click a rule row to view its failed rows below.
+    </div>
+    
+    </div>
+
+    <div class="block">
+      <div class="block-title" id="failedTitle">Failed Rows</div>
+      <div id="failedContainer">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>id</th><th>status</th><th>amount</th><th>_dq_issue</th></tr></thead>
+                <tbody><tr><td>A123</td><td>BAD</td><td>30</td><td class='issue mono'>FAILED: id !~ ^[A-Z]{2}\d{6}$</td></tr><tr><td>ab123456</td><td></td><td>xx</td><td class='issue mono'>FAILED: id !~ ^[A-Z]{2}\d{6}$</td></tr></tbody>
+              </table>
+            </div>
+            </div>
+      <div class='frag' id='frag-1' style='display:none'>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>id</th><th>status</th><th>amount</th><th>_dq_issue</th></tr></thead>
+                <tbody><tr><td>A123</td><td>BAD</td><td>30</td><td class='issue mono'>FAILED: id !~ ^[A-Z]{2}\d{6}$</td></tr><tr><td>ab123456</td><td></td><td>xx</td><td class='issue mono'>FAILED: id !~ ^[A-Z]{2}\d{6}$</td></tr></tbody>
+              </table>
+            </div>
+            </div><div class='frag' id='frag-2' style='display:none'>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>id</th><th>status</th><th>amount</th><th>_dq_issue</th></tr></thead>
+                <tbody><tr><td>A123</td><td>BAD</td><td>30</td><td class='issue mono'>FAILED: status !~ ^(ACTIVE|INACTIVE)$ (NULL not allowed)</td></tr><tr><td>ab123456</td><td></td><td>xx</td><td class='issue mono'>FAILED: status !~ ^(ACTIVE|INACTIVE)$ (NULL not allowed)</td></tr><tr><td>AA999999</td><td>inactive</td><td>999</td><td class='issue mono'>FAILED: status !~ ^(ACTIVE|INACTIVE)$ (NULL not allowed)</td></tr></tbody>
+              </table>
+            </div>
+            </div><div class='frag' id='frag-3' style='display:none'>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>id</th><th>status</th><th>amount</th><th>_dq_issue</th></tr></thead>
+                <tbody><tr><td>ab123456</td><td></td><td>xx</td><td class='issue mono'>FAILED: amount !~ ^\d+(\.\d+)?$</td></tr></tbody>
+              </table>
+            </div>
+            </div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  const table = document.getElementById('summaryTable');
+  const failedContainer = document.getElementById('failedContainer');
+  const failedTitle = document.getElementById('failedTitle');
+
+  function clearSelected() {
+    const rows = table.querySelectorAll('tbody tr.sum-row');
+    rows.forEach(r => r.classList.remove('selected'));
+  }
+
+  function showFailed(checkNo) {
+    const frag = document.getElementById('frag-' + checkNo);
+    if (!frag) {
+      failedContainer.innerHTML = "<div class='note'>No failed rows for this rule.</div>";
+      failedTitle.textContent = "Failed Rows (rule #" + checkNo + ")";
+      return;
+    }
+    failedContainer.innerHTML = frag.innerHTML;
+    failedTitle.textContent = "Failed Rows (rule #" + checkNo + ")";
+  }
+
+  table.addEventListener('click', (evt) => {
+    const tr = evt.target.closest('tr.sum-row');
+    if (!tr) return;
+    const checkNo = tr.getAttribute('data-check');
+    clearSelected();
+    tr.classList.add('selected');
+    if (checkNo) showFailed(checkNo);
+  });
+
+  const firstRow = table.querySelector('tbody tr.sum-row');
+  if (firstRow) {
+    firstRow.classList.add('selected');
+    const checkNo = firstRow.getAttribute('data-check');
+    if (checkNo) showFailed(checkNo);
+  }
+})();
+</script>
+
+</body>
+</html>

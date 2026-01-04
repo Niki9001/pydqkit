@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 
-from pydq.viz import profile_to_html
+from pydqkit.viz import profile_to_html
 
 
 def build_demo_df() -> pd.DataFrame:

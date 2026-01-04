@@ -1,0 +1,2 @@
+column,pattern,mode,allow_null,flags,total,pass,fail,null,non_null,pass_rate,fail_samples
+status,^(ACTIVE|INACTIVE)$,fullmatch,False,,6,3,3,1,5,0.5,BAD|inactive
