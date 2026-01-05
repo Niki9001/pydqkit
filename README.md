@@ -1,4 +1,4 @@
-# pydqkit
+# pythod data quality kit 
 
 **pydqkit** is a lightweight, developer-first Python toolkit for **data quality profiling, data validation, sanity check and interactive HTML visualization**.
 
